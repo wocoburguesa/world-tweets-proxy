@@ -59,6 +59,12 @@ class WorldTweetsProxy(object):
             return ''
 
 if __name__ == '__main__':
+    conf = {
+        '/': {
+            'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.CORS.on': True
+            }
+        }
     cherrypy.config.update({'server.socket_host': '0.0.0.0',})
     cherrypy.config.update({'server.socket_port': int(os.environ.get('PORT', '5000')),})
-    cherrypy.quickstart(WorldTweetsProxy())
+    cherrypy.quickstart(WorldTweetsProxy(), conf)
