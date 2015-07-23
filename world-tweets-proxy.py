@@ -12,6 +12,7 @@ twitter_bearer_token = 'AAAAAAAAAAAAAAAAAAAAAADqggAAAAAADaXS3JkZSt5m6RRmJ0dXZNkE
 yahoo_client_id = 'dj0yJmk9bE5ORHo2MFpJR0NoJmQ9WVdrOVJqbHpOMXBTTTJVbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD1iZQ--'
 
 class WorldTweetsProxy(object):
+    _cp_config = {'tools.CORS.on': True}
     @cherrypy.expose
     def index(self):
         return "wocoburguesa, 2015"
@@ -65,10 +66,12 @@ if __name__ == '__main__':
     conf = {
         '/': {
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
+            'tools.sessions.on': True,
+            'tools.response_headers.on': True,
             'tools.CORS.on': True
             }
         }
-    cherrypy.config.update({'server.socket_host': '0.0.0.0',})
     cherrypy.tools.CORS = cherrypy.Tool('before_handler', CORS)
+    cherrypy.config.update({'server.socket_host': '0.0.0.0',})
     cherrypy.config.update({'server.socket_port': int(os.environ.get('PORT', '5000')),})
     cherrypy.quickstart(WorldTweetsProxy())
