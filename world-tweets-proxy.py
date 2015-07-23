@@ -58,6 +58,9 @@ class WorldTweetsProxy(object):
         else:
             return ''
 
+def CORS():
+    cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+
 if __name__ == '__main__':
     conf = {
         '/': {
@@ -66,5 +69,6 @@ if __name__ == '__main__':
             }
         }
     cherrypy.config.update({'server.socket_host': '0.0.0.0',})
+    cherrypy.tools.CORS = cherrypy.Tool('before_handler', CORS)
     cherrypy.config.update({'server.socket_port': int(os.environ.get('PORT', '5000')),})
-    cherrypy.quickstart(WorldTweetsProxy(), conf)
+    cherrypy.quickstart(WorldTweetsProxy())
