@@ -18,6 +18,10 @@ class WorldTweetsProxy(object):
         return "wocoburguesa, 2015"
 
     @cherrypy.expose
+    def places_detail(self, place=None):
+        return json.dumps(city_data.city_data[place])
+
+    @cherrypy.expose
     def places_proxy(self, place=None):
         if place:
             twitter_headers = {
