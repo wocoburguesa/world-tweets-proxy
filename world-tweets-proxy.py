@@ -27,32 +27,9 @@ class WorldTweetsProxy(object):
             twitter_headers = {
                 'Authorization': 'Bearer ' + twitter_bearer_token
                 }
-#            r = requests.get(
-#                'http://where.yahooapis.com/v1/places.q' +
-#                "('" + place + "')?" +
-#                'appid=' + yahoo_client_id +
-#                '&format=json'
-#                )
-#            yahoo_response = json.loads(r.text)
-#            print r.text
-#            woeid = yahoo_response['places']['place'][0]['woeid']
-
-#            r = requests.get(
-#                'https://api.twitter.com/1.1/trends/available.json',
-#                headers=twitter_headers
-#                )
-#            places = json.loads(r.text)
-#            us_places = []
-#            for place in places:
-#                print place['country']
-#                if place['country'] == 'United States':
-#                    us_places.append(place)
-#            return json.dumps(us_places)
-            print city_data.city_data
-            woeid = city_data.city_data[place][0]['woeid']
 
             twitter_url = 'https://api.twitter.com/1.1/trends/place.json?id=' +\
-                str(woeid)
+                place
             print twitter_url
 
             r = requests.get(
