@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <style>
+.leaflet-popup-content-wrapper {
+    background-color: #E5F2F7;
+    padding: 0;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background-color: #e5f2f7;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+}
+
+#active-popup .title {
+    text-align: center;
+    background-color: #0084b4;
+    color: #f8f8f8;
+    padding: 10px 0;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    margin-bottom: 0;
+}
+
+#active-popup .content {
+    padding: 10px 20px;
+    text-align: center;
+}
+
+.buttons-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.buttons-list li:first-child button {
+    border-top: 1px solid #55acee;
+    border-bottom: 1px solid #55acee;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.buttons-list li:last-child button {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.buttons-list button {
+    width: 100%;
+    padding: 5px;
+    background-color: #f8f8f8;
+    border: 1px solid #55acee;
+    border-top: none;
+    color: #55acee;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.buttons-list button:hover {
+    background-color: #55acee;
+    color: #fff;
+}
+
+.trending-item {
+    border-bottom: 1px solid #e1e8ed;
+    padding-bottom: 3px;
+    padding-top: 3px;
+}
+
+.buttons-list li:last-child .trending-item {
+    border-bottom: none;
+}
+</style>
+    <title>TEST</title>
+  </head>
+
+  <body>
+    <div id="map" style="height:400px;">
+    </div>
+
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+    <script>
+      $(document).ready(function () {
+        initialize();
+      });
+
+var initialize = function () {
+    var map = L.map('map').
+        setView([39.50404070558415, -96.767578125], 4);
+    var layer = L.tileLayer(
+        'http://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            attribution: '',
+            maxZoom: 18
+        }
+    ).addTo(map);
+
+    loadStatestData(function (data) {
+        var states;
+        states = drawStatesData(data);
+        for (var i = 0; i < states.length; i++) {
+            states[i].addTo(map);
+        }
+    });
+};
+
+var loadStatestData = function (callback) {
+    var query = 'SELECT st_asgeojson(wkb_geometry), ' +
+        'stusps, name ' +
+        'FROM dataset_15838 ' +
+        "WHERE stusps NOT IN ('ID', 'MT', 'ND', 'VT', " +
+        "'NH', 'ME', 'WV', 'SC', 'AR', 'KS', 'IA', 'SD', 'WY', " +
+        "'PR', 'AK', 'DE', 'NJ')";
+    $.get(
+        'https://beta.amigocloud.com/api/v1/users/24/projects/985/' +
+            'sql?query=' + query + '&limit=50&offset=0' +
+            '&token=R:xZJAwMLpp78iBpxjRXw0yYoU51v6sEcrTkbrun',
+        function (data) {
+            callback(data);
+        }
+    );
+};
+
+var drawStatesData = function (data) {
+    var statesData = data.data,
+      states = [];
+
+    for (var i = 0; i < statesData.length; i++) {
+        states.push(
+            L.geoJson(
+                JSON.parse(statesData[i].st_asgeojson),
+                {
+                    onEachFeature: function (feature, layer) {
+                        feature.name = statesData[i].name
+                        feature.code = statesData[i].stusps
+
+                        layer.bindPopup(
+                            '<div id="active-popup">' +
+                                '<h3 class="title"></h3>' +
+                                '<div class="content"></div>' +
+                                '</div>',
+                            {
+                                closeButton: false,
+                                minWidth: 200
+                            }
+                        );
+
+                        layer.on('click', layerClickCallback);
+                    },
+                    style: {
+                        weight: 1,
+                        color: '#0084b4',
+                        fillOpacity: 0.5,
+                        fillColor: '#bfe0ec'
+                    }
+                }
+            )
+        );
+    }
+    return states;
+};
+
+var layerClickCallback = function (e, d) {
+    var popup = $('#active-popup'),
+    popupTitle = $($('#active-popup .title')[0]),
+    popupContent = $($('#active-popup .content')[0]),
+    loadingOverlay = $('<div><i class="fa fa-2x fa-spinner fa-spin"></i></div>'),
+    stateCode = e.target.feature.geometry.code,
+    cityButtons;
+
+    popupTitle.html(e.target.feature.geometry.name);
+    popupContent.append(loadingOverlay);
+
+    $.ajax({
+        method: 'GET',
+        url: 'https://world-tweets-proxy.herokuapp.com/places_detail?place=' +
+            e.target.feature.geometry.code,
+    }).done(function (data) {
+        var listElement = $('<ul class="buttons-list"></ul>');
+        popupContent.append(listElement);
+        loadingOverlay.remove();
+
+        data = JSON.parse(data);
+
+        if (data.length > 1) {
+            cityButtons = [];
+            for (var i = 0; i < data.length; i++) {
+                cityButtons.push(
+                    $('<li><button class="city-button" data-woeid="' +
+                      data[i].woeid + '" data-name="' +
+                      data[i].name + '">' +
+                      data[i].name +
+                      '</button></li>')
+                );
+                cityButtons[i].woeid = data[i].woeid;
+                cityButtons[i].click(function (e, d) {
+                    listElement.remove();
+                    removeElements(cityButtons);
+                    popupContent.append(loadingOverlay);
+                    loadTrendsForPlace(e.target.dataset.woeid).
+                        done(function (trendsData) {
+                            popupContent.append(listElement);
+                            trendsData = JSON.parse(trendsData)[0].trends;
+                            for (var i = 0; i < trendsData.length; i++) {
+                                listElement.append(
+                                    buildTrendElement(trendsData[i])
+                                );
+                            }
+
+                            popupTitle.html(e.target.dataset.name + ', ' + stateCode);
+                        }).fail(function (error) {
+                        }).always(function () {
+                            loadingOverlay.remove();
+                        });
+                });
+                listElement.append(cityButtons[i]);
+            }
+        } else {
+            loadTrendsForPlace(data[0].woeid).
+                done(function (trendsData) {
+                    popupContent.append(listElement);
+                    trendsData = JSON.parse(trendsData)[0].trends;
+                    for (var i = 0; i < trendsData.length; i++) {
+                        listElement.append(
+                            buildTrendElement(trendsData[i])
+                        );
+                    }
+                    popupTitle.html(data[0].name + ', ' + stateCode);
+                }).fail(function (error) {
+                }).always(function () {
+                    loadingOverlay.remove();
+                });
+
+        }
+    });
+};
+
+var removeElements = function (array) {
+    for (var i = 0; i < array.length; i++) {
+        array[i].remove();
+    }
+};
+
+var loadTrendsForPlace = function (woeid) {
+    return $.ajax({
+        method: 'GET',
+        url: 'https://world-tweets-proxy.herokuapp.com/places_proxy?place=' +
+            woeid,
+    });
+};
+
+var buildTrendElement = function (trendData) {
+    return $(
+        '<li><div class="trending-item">' +
+            '<a href="' + trendData.url +'" target="_blank">' +
+            trendData.name + '</a>' +
+            '</div></li>'
+    );
+};
+    </script>
+  </body>
+</html>

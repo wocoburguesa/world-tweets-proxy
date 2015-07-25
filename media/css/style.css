@@ -1,0 +1,71 @@
+.leaflet-popup-content-wrapper {
+    background-color: #E5F2F7;
+    padding: 0;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background-color: #e5f2f7;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+}
+
+#active-popup .title {
+    text-align: center;
+    background-color: #0084b4;
+    color: #f8f8f8;
+    padding: 10px 0;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    margin-bottom: 0;
+}
+
+#active-popup .content {
+    padding: 10px 20px;
+    text-align: center;
+}
+
+.buttons-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.buttons-list li:first-child button {
+    border-top: 1px solid #55acee;
+    border-bottom: 1px solid #55acee;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+.buttons-list li:last-child button {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+.buttons-list button {
+    width: 100%;
+    padding: 5px;
+    background-color: #f8f8f8;
+    border: 1px solid #55acee;
+    border-top: none;
+    color: #55acee;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.buttons-list button:hover {
+    background-color: #55acee;
+    color: #fff;
+}
+
+.trending-item {
+    border-bottom: 1px solid #e1e8ed;
+    padding-bottom: 3px;
+    padding-top: 3px;
+}
+
+.buttons-list li:last-child .trending-item {
+    border-bottom: none;
+}

@@ -11,11 +11,17 @@ from constants import city_data
 twitter_bearer_token = 'AAAAAAAAAAAAAAAAAAAAAADqggAAAAAADaXS3JkZSt5m6RRmJ0dXZNkE7%2BE%3DOCNTnvPlh7UVYtJkhZDkjjKDIEeqI4IoqD3SBlmj5SyEeNt4Ca'
 yahoo_client_id = 'dj0yJmk9bE5ORHo2MFpJR0NoJmQ9WVdrOVJqbHpOMXBTTTJVbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD1iZQ--'
 
+MEDIA_DIR = os.path.join(os.path.abspath("."), u"media")
+
 class WorldTweetsProxy(object):
     _cp_config = {'tools.CORS.on': True}
     @cherrypy.expose
     def index(self):
-        return "wocoburguesa, 2015"
+        return 'wocoburguesa, 2015'
+
+    @cherrypy.expose
+    def world_tweets(self):
+        return open(os.path.join(MEDIA_DIR, u'index.html'))
 
     @cherrypy.expose
     def places_detail(self, place=None):
@@ -49,7 +55,16 @@ if __name__ == '__main__':
             'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
             'tools.sessions.on': True,
             'tools.response_headers.on': True,
-            'tools.CORS.on': True
+            'tools.CORS.on': True,
+            'tools.staticfile.root': MEDIA_DIR,
+            },
+        '/css/style.css': {
+            'tools.staticfile.on': True,
+            'tools.staticfile.filename': 'css/style.css',
+            },
+        '/js': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'js',
             }
         }
     cherrypy.tools.CORS = cherrypy.Tool('before_handler', CORS)
